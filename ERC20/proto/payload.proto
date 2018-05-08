@@ -1,0 +1,43 @@
+syntax = "proto3";
+package erc20_pb;
+
+import "google/protobuf/any.proto";
+
+message Payload {
+    ERC20Action action = 1;
+    AnyData data = 2;
+}
+
+enum ERC20Action {
+    INITIALIZE = 0;
+    TRANSFER = 1;
+    APPROVE = 2; 
+    TRANSFER_FROM = 3;
+}
+
+message AnyData {
+    google.protobuf.Any data = 1;
+}
+
+message TransferPayload {
+    string to = 1; 
+    string tokens = 2;
+}
+
+message ApprovePayload {
+    string spender = 1; 
+    string tokens = 2;
+}
+
+message TransferFromPayload {
+    string from = 1; 
+    string to = 2; 
+    string tokens = 3;
+}
+
+message InitTokenStatePayload {
+    string symbol = 1; 
+    string name = 2; 
+    string decimals = 3;
+    string totalSupply = 4;
+}

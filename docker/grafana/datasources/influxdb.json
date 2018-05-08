@@ -1,0 +1,8 @@
+{
+  "name":"sawtooth-metrics",
+  "type":"influxdb",
+  "url":"http://sawtooth-metrics:8086",
+  "access":"proxy",
+  "database":"metrics",
+  "basicauth":false
+}

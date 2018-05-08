@@ -1,0 +1,111 @@
+# Copyright 2017 Intel Corporation
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ------------------------------------------------------------------------------
+
+version: "3.5"
+
+services:
+
+  settings-tp:
+    image: hyperledger/sawtooth-settings-tp:1.0
+    container_name: sawtooth-settings-tp-default
+    depends_on:
+      - validator
+    entrypoint: settings-tp -vv -C tcp://validator:4004
+    networks: 
+      - erc20-blockchain
+      
+  erc20-token-tp:
+    image: erc20-token-tp:latest
+    depends_on:
+      - validator
+    container_name: erc20-token-tp
+    entrypoint: "bash -c \"\
+          ./erc20-token-transaction-processor -vv -C tcp://validator:4004 \
+        \""
+    networks: 
+      - erc20-blockchain
+
+  sawooth-metrics-dashboard:
+    image: sawooth-metrics-dashboard:latest
+    expose: 
+      - 3000
+    ports: 
+      - "3000:3000"
+    depends_on: 
+      - sawtooth-metrics
+    container_name: sawooth-metrics-dashboard
+    networks: 
+      - erc20-blockchain
+
+  sawtooth-metrics:
+    image: sawtooth-metrics:latest
+    expose: 
+      - 8086
+    ports: 
+      - "8086:8086"
+    container_name: sawtooth-metrics
+    networks: 
+      - erc20-blockchain
+
+  validator:
+    image: sawtooth-validator:latest
+    container_name: sawtooth-validator-default
+    expose:
+      - 4004
+      - 8800
+    volumes: 
+      - ./configuration/configuration.sh:/erc20-configuration/configuration.sh
+    ports:
+      - "4004:4004"
+    entrypoint: "bash -c \"\
+        ./erc20-configuration/configuration.sh && \
+        sawtooth-validator -vv \
+          --endpoint tcp://validator:8800 \
+          --bind component:tcp://eth0:4004 \
+          --bind network:tcp://eth0:8800 \
+        \""
+    networks: 
+      - erc20-blockchain
+
+  rest-api:
+    image: hyperledger/sawtooth-rest-api:1.0
+    container_name: sawtooth-rest-api-default
+    ports:
+      - "8008:8008"
+    depends_on:
+      - validator
+      - sawtooth-metrics
+    entrypoint: sawtooth-rest-api -C tcp://validator:4004 --bind rest-api:8008 --opentsdb-url http://sawtooth-metrics:8086 --opentsdb-db metrics
+    networks: 
+      - erc20-blockchain
+
+  shell:
+    image: hyperledger/sawtooth-all:1.0
+    container_name: sawtooth-shell-default
+    volumes: 
+      - ./configuration/genesis/genesis.batch:/genesis/genesis.batch
+    depends_on:
+      - rest-api
+      - erc20-token-tp
+    entrypoint: "bash -c \"\
+        curl --url 'http://rest-api:8008/batches' --request POST --header 'Content-Type: application/octet-stream' --data-binary @/genesis/genesis.batch  && \
+        sawtooth keygen && \
+        tail -f /dev/null \
+        \""
+    networks: 
+      - erc20-blockchain
+
+networks: 
+  erc20-blockchain:
+    name: erc20chain

@@ -1,0 +1,12 @@
+syntax = "proto3";
+package erc20_pb;
+
+message State {
+    message Balances {
+        map<string, string> balances = 1;
+    }
+    message Allowed {
+        map<string, string> allowed = 1;
+    }
+}
+

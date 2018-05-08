@@ -1,0 +1,19 @@
+{
+  "name": "ui",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "genesis": "node ./genesis.js"
+  },
+  "dependencies": {
+    "add": "^2.0.6",
+    "bignumber.js": "^7.0.1",
+    "cbor": "^4.0.0",
+    "google-closure-library": "^20180405.0.0",
+    "google-protobuf": "^3.5.0",
+    "sawtooth-sdk": "^1.0.2",
+    "web3": "^0.20.6",
+    "yarn": "^1.6.0"
+  }
+}
