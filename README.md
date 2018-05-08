@@ -1,4 +1,4 @@
-# sawtooth-erc20
+# sawtooth-erc20-token
 
 This project serves as a good example of how to develop transaction processors with Golang in Hyperledger Sawtooth. We are using the ERC20 specification to develop a transaction processors that handles token functionality such as Transfer, Approve, and TransferFrom. An example wallet ui can be found in the wallet-react-ui directory. 
 
